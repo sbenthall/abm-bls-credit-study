@@ -1,0 +1,19 @@
+UID,Name,Actor,Algorithm,Process,Choices (optional),Effects,Regulations,Note
+AdC,Advertise Credit,Lender,TRUE,,"Rates, Terms, Target Audience",AP,"UDNDR, UDFR, UDNA, ECND, FHAND, TILA",District court in the 7th Cir. just found prosepctive applicants to be outside of the scope of the ECOA. CFPB v. Townstone Financial. This case is now being appealed.
+AP,Apply for Credit,Borrower,,1,,RI,,
+RI,Request for Information from applicant,Lender,,1,,EC,"ECND, ECN, FHAND",
+EC,Evaluate for Credit,Lender,TRUE,1,Offer/decline/terminate open-end credit,"OC,DC","ECND, ECN, FHAND",
+DC,Decline to Offer Credit,Lender,,1,Explanations,CH+,"ECND, ECN, FCRANA, FHAND",Can we combine DC and OC ? 
+OC,Offer Credit,Lender,TRUE,1,"Rates, Terms, Explanations","AC, CH+","UDNDR, ECND, ECN, FCRANA, FHAND, TILA",
+AC,Accept Credit,Borrower,,1,Yes/No,PB,,Q: would this affect CH if not accepted?
+PB,Pay Back ,Borrower,,1,Pay/Default,CH+,,
+,,,,,,,,
+,,,,,,,,
+CH,Credit History,Borrower,,1,,"CS, SocD",,
+LE,Life Events,Borrower,,1,,"PD, SC",,
+CS,Credit Scoring,Credit Scorer,TRUE,1,,EC,FCRA,
+,,,,,,,,
+SocD,Alternative Data,,,,,CS,???,
+SC,Social Contagion,,,,,PD,,
+PD,Personal data,Borrower,,1,,CS,,
+PA ,Protected Attributes,Borrower,,,,"SocD, SC, LE, PD",,
