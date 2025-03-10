@@ -21,11 +21,11 @@ How will we subscript/denote variables that are specific to a single agent? With
 
 * - Parameter
   - Explanation
-* - $p_c$
+* - $p_i$
   - protected attribute of consumer
 * - $\rho$
   - risk aversion
-* - $\beta_c$
+* - $\beta_i$
   - Discount factor
 * - $r^*$
   - federal interest rate
@@ -39,7 +39,7 @@ How will we subscript/denote variables that are specific to a single agent? With
   - Explanation
 * - $\theta \sim \text{LogNormal}(\mu(p_c), \sigma(p_c))$
   - Income shock
-* - $m = r a_{-1} + y$
+* - $m = (1 + r_i) a_{-1} + y$
   - Update resources available
 * - $c(m,y) \leq m + \underbar{m}$
   - Quantity of consumption chosen by consumer
@@ -62,9 +62,9 @@ or is it?
 
 * - Equation
   - Explanation
-* - $theta$
+* - $\theta$
   - interest rate decision rule parameters.
-* - $r_c = r_\theta(a_c, y_c, [p_c])$
+* - $r_i = r_\theta(a^{-1}_i, y_i, [p_i], [a_i ?])$
   - Interest rate. (protected attribute policy-optional)
 * - $b = - \sum_c a_c$
   - bank's borrowed balanced from federal lender
@@ -80,7 +80,29 @@ They simply try to maximize profit.
 
 In a partial equilibrium framework, lenders are assumed to have access to funds at an exogenous risk-free rate $r^*$. They lend to households using a price function $q_\theta$. Lenders aim to maximize or ensure non-negative expected profits, defined as:
 
+## proposal for how to deal with default
 
+```{list-table} additional equations to handle defaulting. A proposal.
+:header-rows: 1
+:label: example-table
+
+* - Equation
+  - Explanation
+* - $0 \leq d() \leq - a^{-1}$
+  - amount of 'default' by consumer
+* - $m = a^{-1} [+ d] + r_i(a_{-1} + d)  + y g(d^{-1})$
+  - consumner market resources
+* - $\zeta$
+  - credit history forgiveness rate
+* - $h = \zeta h^{-1} + d$
+  - credit history
+* - $r_i = r_\theta(a_i, y_i, [p_i], [h_i])$
+  - lender takes credit history into account
+* - $\underbar{m} = r_\theta(a_i, y_i, [p_i], [h_i]) $
+  - borrowing limit as set by the bank
+* - $f = r^* b + \sum r_c  (- a_c + d) $
+  - lender profit [reward]
+```
 
 ## Agent strategies
 
