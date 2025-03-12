@@ -11,9 +11,7 @@ each one determining the value of:
 - A *control variable* - an undefined function of other variables, subject to *constraints*, a function of other variables
 - A *reward variable* - like a state variable, but with special significance as the payoff to an agent.
 
-:::{attention} Consumer subscripts
-How will we subscript/denote variables that are specific to a single agent? Without it getting too messy
-:::
+We will denote the index of differnet consumers with $i$.
 
 ```{list-table} Parameters
 :header-rows: 1
@@ -21,7 +19,7 @@ How will we subscript/denote variables that are specific to a single agent? With
 
 * - Parameter
   - Explanation
-* - $p_c$
+* - $p_i$
   - protected attribute of consumer
 * - $\rho$
   - risk aversion
@@ -29,6 +27,10 @@ How will we subscript/denote variables that are specific to a single agent? With
   - Discount factor
 * - $r^*$
   - federal interest rate
+* - $0 \leq g \leq 1$
+  - Credit history forgiveness rate
+* - $\bar{r}$
+  - interest rate cap; based on usury law
 ```
 
 ```{list-table} Consumer dynamics
@@ -37,9 +39,9 @@ How will we subscript/denote variables that are specific to a single agent? With
 
 * - Equation
   - Explanation
-* - $\theta \sim \text{LogNormal}(\mu(p_c), \sigma(p_c))$
+* - $\epsilon \sim \text{LogNormal}(\mu(p_c), \sigma(p_c))$
   - Income shock
-* - $m = r a_{-1} + y$
+* - $m = r a^{-1} + y$
   - Update resources available
 * - $c(m,y) \leq m + \underbar{m}$
   - Quantity of consumption chosen by consumer
@@ -47,7 +49,7 @@ How will we subscript/denote variables that are specific to a single agent? With
   - Consumer utility. [reward]
 * - $a = m - c$
   - End of period assets are what are unconsumed
-* - $y = y_{-1} + \theta$
+* - $y = y^{-1} + \epsilon$
   - Update income, exogenous process
 ```
 
@@ -62,13 +64,13 @@ or is it?
 
 * - Equation
   - Explanation
-* - $theta$
+* - $\theta$
   - interest rate decision rule parameters.
-* - $r_c = r_\theta(a_c, y_c, [p_c])$
+* - $r_i = r_\theta(a_i, y_i, [p_i]) \leq \bar{r}$
   - Interest rate. (protected attribute policy-optional)
-* - $b = - \sum_c a_c$
+* - $b = - \sum_i a_i$
   - bank's borrowed balanced from federal lender
-* - $f = r^* b + \sum r_c ( - a_c)$
+* - $f = r^* b + \sum_i r_i ( - a_i)$
   - lender profit [reward]
 ```
 
@@ -77,8 +79,34 @@ Here, $\theta$ are parameters of the decision rule for $r$.
 The banks are considered risk-neutral, so they don't have a risk-averse utility function.
 They simply try to maximize profit.
 
+Lender heterogenity: **Payday lenders** don't get access to federal lenders (higher $r^*$), won't get bailed out by the federal government, may not take credit history ($h$, see below) or ability to pay ($y > a r$).
 
 In a partial equilibrium framework, lenders are assumed to have access to funds at an exogenous risk-free rate $r^*$. They lend to households using a price function $q_\theta$. Lenders aim to maximize or ensure non-negative expected profits, defined as:
+
+
+## A proposal about defaults
+
+The basic idea is that consumers can choose to default on some amount of their debt.
+This amount of default aggregates over time, and also decays -- this is 'credit history'.
+This is a factor in calculating interest rates.
+
+```{list-table} Possible default dynamics
+:header-rows: 1
+:label: example-table
+
+* - Equation
+  - Explanation
+* - $a^{-1} \ge d(a^{-1}) \ge 0$
+  - continuous default decision
+* - $h = g h^{-1} + d$
+  - 'Credit history' -- roughly, quantity of past default
+* - $m = r (a^{-1} - d)  + y$
+  - Update resources available, with default
+* - ...
+  - Quantity of consumption chosen by consumer
+* - $r_i = r_\theta(a_i, y_i, [h_i], [p_i])$
+  - Lender may or may not take credit history into account
+```
 
 
 
