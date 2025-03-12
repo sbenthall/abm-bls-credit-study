@@ -41,7 +41,7 @@ We will denote the index of differnet consumers with $i$.
   - Explanation
 * - $\epsilon \sim \text{LogNormal}(\mu(p_c), \sigma(p_c))$
   - Income shock
-* - $m = r a^{-1} + y$
+* - $m = (1 + r) a^{-1} + y$
   - Update resources available
 * - $c(m,y) \leq m + \underbar{m}$
   - Quantity of consumption chosen by consumer
@@ -66,7 +66,7 @@ or is it?
   - Explanation
 * - $\theta$
   - interest rate decision rule parameters.
-* - $r_i = r_\theta(a_i, y_i, [p_i]) \leq \bar{r}$
+* - $r_i = r_\theta(a_i, y_i, [p_i], [a_i?]) \leq \bar{r}$
   - Interest rate. (protected attribute policy-optional)
 * - $b = - \sum_i a_i$
   - bank's borrowed balanced from federal lender
@@ -109,6 +109,27 @@ This is a factor in calculating interest rates.
 ```
 
 
+```{list-table} additional equations to handle defaulting. A proposal.
+:header-rows: 1
+:label: example-table
+
+* - Equation
+  - Explanation
+* - $0 \leq d() \leq - a^{-1}$
+  - amount of 'default' by consumer
+* - $m = a^{-1} [+ d] + r_i(a_{-1} + d)  + y g(d^{-1})$
+  - consumner market resources
+* - $\zeta$
+  - credit history forgiveness rate
+* - $h = \zeta h^{-1} + d$
+  - credit history
+* - $r_i = r_\theta(a_i, y_i, [p_i], [h_i])$
+  - lender takes credit history into account
+* - $\underbar{m} = r_\theta(a_i, y_i, [p_i], [h_i]) $
+  - borrowing limit as set by the bank
+* - $f = r^* b + \sum r_c  (- a_c + d) $
+  - lender profit [reward]
+```
 
 ## Agent strategies
 
