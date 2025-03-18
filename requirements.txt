@@ -1,1 +1,2 @@
 econ-ark @ git+https://github.com/econ-ark/HARK@master
+mystmd
