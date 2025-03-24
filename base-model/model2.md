@@ -1,3 +1,5 @@
+# Base Model Draft 2
+
 1.  **State Space**
 
 Each period $t$, an individual’s state is
