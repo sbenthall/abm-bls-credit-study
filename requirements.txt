@@ -1,2 +1,2 @@
-econ-ark @ git+https://github.com/econ-ark/HARK@master
+scikit-agent @ git+https://github.com/scikit-agent/scikit-agent.git@main
 mystmd
