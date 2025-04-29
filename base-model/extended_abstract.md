@@ -139,15 +139,15 @@ Special cases of this optimization rule get us to simpler 'base models' that we 
   2. Construct the theoretical lender risk $\Xi_l$
   3. Define the empirical consumer risk $foo$
   4. Define the empirical lender risk $bar$
-  5. $f(u, v) \leftarrow 0$ for all edges $(u,v)$
+  5. ...
 
 2. Train the machine, finding $\theta_\pi$ and $\theta_l$ that minimize the risk functions $\Xi_c$ and $\Xi_l$:
 
-	1. Find $c_{f}(p)= \min \{c_{f}(u,v):(u,v)\in p\}$
-	2. For each edge $(u,v) \in p$
+	1. ...
+	2. ...
 
-		1. $f(u,v) \leftarrow f(u,v) + c_{f}(p)$ *(Send flow along the path)*
-		2. $f(u,v) \leftarrow f(u,v) - c_{f}(p)$ *(The flow might be "returned" later)*
+		1. ...
+		2. ...
 :::
 
 ## specific model variations and scenarios
