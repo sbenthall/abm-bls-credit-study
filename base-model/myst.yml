@@ -18,6 +18,15 @@ project:
       subtitle: Extended Abstract for 2025 Conference on Machine Learning for Economics and Finance
       #[Registration Form](https://docs.google.com/forms/d/e/1FAIpQLSfhdHAxHibLHKVzSZtPWfZhAst8LIaGvkdef1VphTtANaDlZA/viewform)
       #"We invite submissions of both theoretical and applied research. Authors are strongly encouraged to submit full papers, which will be given preference. However, extended abstracts (maximum 1,000 words), including methodology, data, and key hypotheses, will also be considered."
+      proof_latex_notheorem: ["algorithm"]  # Tell sphinx-proof not to define algorithm
+      latex_elements:
+        preamble: |
+          \usepackage{amsthm}
+          \usepackage{algorithm}
+          \usepackage{algorithmic}
+        
+          % Define the algorithm environment explicitly
+          \newtheorem{algorithm}{Algorithm}
 
   authors:
     - name: Sebastian Benthall
@@ -45,3 +54,6 @@ site:
 bibliography:
   - references.bib
   
+sphinx:
+  extra_extensions:
+    - sphinx_proof

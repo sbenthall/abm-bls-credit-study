@@ -1,4 +1,4 @@
-# Exploring Effects of Consumer Finance Regulation with Deep Learning
+# Alan draft merged
 
 Consumer finance protection in the United States has opened a new chapter after the Trump administration has dismantled much of the Consumer Finance Protection Bureau (CFPB), the federal agency with the strongest mandate for enforcing it. 
 

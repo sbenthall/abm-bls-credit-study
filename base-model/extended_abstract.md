@@ -1,4 +1,4 @@
-# Abstract: Exploring Effects of Consumer Finance Regulation with Deep Learning
+# Abstract: Exploring Effects of Consumer Finance Regulation with Deep Learning 20250430
 
 Over the past century, consumer credit in the United States has become an essential tool for the
 economic life of American consumers ([Hyman, 2011](https://doi.org/10.23943/princeton/9780691140681.001.0001)
@@ -202,8 +202,6 @@ We propose solving for this strategic Nash equilibrium computationally using an 
 
 ## Solution Algorithm
 
-:::{prf:algorithm} Solution procedure (Conceptual Outline - Stochastic Fictitious Play)
-:label: my-algorithm
 
 **Objective:** Find parameters $(\theta^*, \phi^*)$ for the consumer policy network $\sigma(...; \theta)$ and lender policy network $\rho(...; \phi)$ that approximate a strategic Nash equilibrium, considering the within-period simultaneity.
 
@@ -236,7 +234,7 @@ We propose solving for this strategic Nash equilibrium computationally using an 
 3.  **Output:** The converged parameters $(\theta^*, \phi^*)$ approximate the equilibrium decision rules $(\sigma(...; \theta^*), \rho(...; \phi^*))$.
 
 *Note:* A key challenge is handling the within-period interaction where $y_t$ depends on $q_t$ via $\sigma$ and $q_t$ depends on $y_t$ via $\rho$. While the description above implies using the opponent's fixed policy within each optimization step (consistent with alternating optimization / fictitious play), some implementations might explicitly solve the inner fixed-point $y_t = \sigma(x_t, z_t; q_t, \theta^{(k)})$, $q_t = \rho(x_t, y_t, z_t; \phi^{(k)})$ at each simulation/evaluation step. This adds computational cost and complexity, particularly for gradient calculation (requiring techniques like the implicit function theorem or differentiating the solver). The convergence properties and efficiency may differ between these approaches.
-:::
+
 
 ## Model variations
 
