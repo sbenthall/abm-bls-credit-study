@@ -17,6 +17,11 @@ Consumer variables:
 
 Lender variables:
   - lender can borrow at $r^*$
+
+**TODO: We need to break out all the different possible shocks $z$**
+ - some could be observed by consumer
+ - some can be observed by lender
+ - some can be correlated with consumer attributes.
    
 ## Dynamics
 
@@ -28,6 +33,7 @@ Lender variables:
     - $ a_{t+1} = (1-d_t) (1/q_t) [ a_t + e(z_t) - c_t ] $
   - $h_{t+1} = T_h(x_t,  y^*_t, z_t; q^*_t)$
     - **TODO** Example credit history law of motion.
+    - Does $h$ depend on $\phi$?
   
 ## Rewards
 
@@ -74,7 +80,8 @@ However, this disparity may be limited by stricter time limits for negative info
 
 - *Bank profit.* We measure expected bank profit $\sum^N \pi$.
 - *Disparity*. Differences in the moments of assets $a_t$ and credit histories $h_t$ for subpopulations $N_p$
-
+- *Default rates*. Proportion of $d$
+- *Consumption equivalent welfare.*  Alan to look into this.
 
 
 # Appendix
