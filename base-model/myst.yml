@@ -1,15 +1,47 @@
 # See docs at: https://mystmd.org/guide/frontmatter
 version: 1
 project:
-  id: 0bc6e7b5-e038-40ff-97f6-acad4051bea5
+  id: 19f5b742-16af-4554-b804-ac7191a94d87
   # title:
   # description:
   # keywords: []
   # authors: []
   github: https://github.com/sbenthall/abm-bls-credit-study
   # To autogenerate a Table of Contents, run "myst init --write-toc"
+
+  exports:
+    - format: pdf
+      template: arxiv_nips
+      article: extended_abstract.md
+      output: exports/extended_abstract.pdf
+      title: Exploring Effects of Consumer Finance Regulation with Deep Learning
+      subtitle: Extended Abstract for 2025 Conference on Machine Learning for Economics and Finance
+      #[Registration Form](https://docs.google.com/forms/d/e/1FAIpQLSfhdHAxHibLHKVzSZtPWfZhAst8LIaGvkdef1VphTtANaDlZA/viewform)
+      #"We invite submissions of both theoretical and applied research. Authors are strongly encouraged to submit full papers, which will be given preference. However, extended abstracts (maximum 1,000 words), including methodology, data, and key hypotheses, will also be considered."
+
+  authors:
+    - name: Sebastian Benthall
+      affiliations:
+      - New York University
+      - International Computer Science Institute
+    - name: Alan Lujan
+      affiliations:
+      - Johns Hopkins University
+    - name: Ngozi Nwanta
+      affiliations:
+      - New York University
+    - name: Zixuan Pan
+      affiliations:
+      - International Computer Science Institute
+    - name: Katherine Strandburg
+      affiliations:
+      - New York University  
 site:
   template: book-theme
   # options:
   #   favicon: favicon.ico
   #   logo: site_logo.png
+
+bibliography:
+  - references.bib
+  
