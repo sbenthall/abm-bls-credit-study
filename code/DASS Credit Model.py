@@ -12,12 +12,8 @@ def _():
 
 
 @app.cell
-def _(pydot):
-    csdot = pydot.Dot()                                                           
-    csdot.set('rankdir', 'TB')                                                    
-    csdot.set('concentrate', True)                                                
-    csdot.set_node_defaults(shape='record')
-    return (csdot,)
+def _():
+    return
 
 
 @app.cell
@@ -31,20 +27,27 @@ def _(pydot):
 
 
 @app.cell
-def _(add_node, csdot, pydot):
+def _(add_node, pydot):
+    csdot = pydot.Dot()                                                           
+    csdot.set('rankdir', 'TB')                                                    
+    csdot.set('concentrate', True)                                                
+    csdot.set_node_defaults(shape='record')
 
     # Create a graph and set defaults
 
     add_node(csdot, 'p', 'protected attribute', nodeattrs={'shape':'plain'})
     add_node(csdot, 'beta', 'discount factor', nodeattrs={'shape':'plain'})
-
     add_node(csdot, 'r*', 'risk-free lender rate', nodeattrs={'shape':'plain'})
 
-    add_node(csdot, 'z', 'shock', nodeattrs={'shape':'doublecircle'})
-    add_node(csdot, 'zp', 'p-shock', nodeattrs={'shape':'doublecircle'})
+    add_node(csdot, 'ze', 'e-shock', nodeattrs={'shape':'doublecircle'})
+    add_node(csdot, 'zh', 'h-shock', nodeattrs={'shape':'doublecircle'})
+
+    add_node(csdot, 'phi', 'phi', nodeattrs={'shape':'trapezium', 'fillcolor':'yellow'})
+    add_node(csdot, 'theta', 'theta', nodeattrs={'shape':'trapezium', 'fillcolor':'aliceblue'})
+
 
     add_node(csdot, 'a', 'wealth', nodeattrs={'shape':'ellipse'})
-    add_node(csdot, 'e', 'earnings')
+    add_node(csdot, 'e', 'earnings??')
     add_node(csdot, 'q', 'interest rate', nodeattrs={'fillcolor':'yellow'})
     add_node(csdot, 'c', 'consumption', nodeattrs={'fillcolor':'aliceblue'})
     add_node(csdot, 'u', 'utility', nodeattrs={'shape':'diamond', 'fillcolor':'aliceblue'})
@@ -60,14 +63,21 @@ def _(add_node, csdot, pydot):
 
     #node.set("fillcolor", "aliceblue")
 
-    csdot.add_edge( pydot.Edge('p','zp'))
+    csdot.add_edge( pydot.Edge('p','ze', **{'style': 'dotted'}))
+    csdot.add_edge( pydot.Edge('p','zh', **{'style': 'dotted'}))
 
 
-    csdot.add_edge( pydot.Edge('zp','e', **{'style': 'dotted'}))
-    csdot.add_edge( pydot.Edge('zp','h+', **{'style': 'dotted'}))
+    csdot.add_edge( pydot.Edge('ze','e'))
+    csdot.add_edge( pydot.Edge('zh','h+'))
 
-    csdot.add_edge( pydot.Edge('z','e', **{'style': 'dotted'}))
-    csdot.add_edge( pydot.Edge('z','h+', **{'style': 'dotted'}))
+    #csdot.add_edge( pydot.Edge('z','e', **{'style': 'dotted'}))
+    #csdot.add_edge( pydot.Edge('z','h+', **{'style': 'dotted'}))
+
+    csdot.add_edge( pydot.Edge('p','q', **{'style': 'dotted'}))
+
+    csdot.add_edge( pydot.Edge('phi','h'))
+    csdot.add_edge( pydot.Edge('phi','q'))
+    csdot.add_edge( pydot.Edge('theta','c'))
 
     csdot.add_edge( pydot.Edge('r*','q'))
     csdot.add_edge( pydot.Edge('a','q'))
@@ -83,7 +93,7 @@ def _(add_node, csdot, pydot):
     csdot.add_edge( pydot.Edge('h','d'))
     csdot.add_edge( pydot.Edge('e','d'))
 
-
+    csdot.add_edge( pydot.Edge('e','h+', **{'style': 'dotted'}))
 
 
     csdot.add_edge( pydot.Edge('c','a+'))
@@ -98,10 +108,11 @@ def _(add_node, csdot, pydot):
     csdot.add_edge( pydot.Edge('f','h+'))
 
     csdot.add_edge( pydot.Edge('a+','pi'))
+    csdot.add_edge( pydot.Edge('d','pi'))
     csdot.add_edge( pydot.Edge('q','pi'))
 
     #dot.add_edge( pydot.Edge('F','S'))
-    return
+    return (csdot,)
 
 
 @app.cell

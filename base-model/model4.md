@@ -27,13 +27,19 @@ Lender variables:
 
 - consumer parameterrized decision rule $y_t = \sigma(x_t, z_t; q_t, \theta)$ **TODO: There may be idiosyncratic shocks that are not known to the consumer.**
   - Is there a borrowing limit? (constraint on $c_t)
--  lender parameterized decision rule: $q_t = \rho(x_t, y_t, z_t; \phi)$\
+-  lender parameterized decision rule: 
+  - **AL original:** $q_t = \rho(x_t, y_t, z_t; \phi)$
+  - **SB proposal:** $q_{t+1} = \rho(x_{t+1}; \phi) = \rho(x_t, y_t, z_t; \phi)$
+- **Question: are we keeping earnings $e$ as a random walk? Are shocks $z$ a Markov process?**
 - $x_{t+1} = T(x_t, y^*_t, z_t; q^*_t)$. Which can be broken down into:
   - $a_{t+1} = T_a(x_t,  y^*_t, z_t; q^*_t)$
     - $ a_{t+1} = (1-d_t) (1/q_t) [ a_t + e(z_t) - c_t ] $
   - $h_{t+1} = T_h(x_t,  y^*_t, z_t; q^*_t)$
-    - **TODO** Example credit history law of motion.
     - Does $h$ depend on $\phi$?
+    - $h_{t+1} = \eta h_t + \phi_e z_e + \phi_d d$ where:
+      - $\eta \in (0,1)$ is a forgetting rate on history.
+      - $\phi_e$ and $\phi_d$ are subparameters of $\phi$ used as coefficients.
+      - $z_e$ is that component of the shockes (exogenous state) that represents earnings.
   
 ## Rewards
 
