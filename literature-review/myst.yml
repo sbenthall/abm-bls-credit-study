@@ -1,0 +1,15 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: 4a80bb01-b28d-439c-abe8-b1f5cb0c1b58
+  # title:
+  # description:
+  # keywords: []
+  # authors: []
+  github: https://github.com/sbenthall/abm-bls-credit-study
+  # To autogenerate a Table of Contents, run "myst init --write-toc"
+site:
+  template: book-theme
+  # options:
+  #   favicon: favicon.ico
+  #   logo: site_logo.png
