@@ -4,8 +4,28 @@ import matplotlib.pyplot as plt
 import colorsys
 import random
 import os
+import yaml
 from collections import defaultdict
 from skagent.model import Control, DBlock, RBlock
+
+def load_config(config_file='model_visualization_config.yaml'):
+    """
+    Load visualization configuration from YAML file.
+    
+    Parameters:
+    config_file -- Path to configuration YAML file
+    
+    Returns:
+    Dictionary containing visualization configuration
+    """
+    try:
+        with open(config_file, 'r') as file:
+            return yaml.safe_load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Configuration file {config_file} not found.\n"
+            f"Please ensure the configuration file exists, or create one using the provided template."
+        )
 
 class DBlockVisualizer:
     """
@@ -14,7 +34,7 @@ class DBlockVisualizer:
     Supports identification of time dependencies to create a directed acyclic graph.
     """
     
-    def __init__(self, block, agent_attribution=None, calibration=None):
+    def __init__(self, block, agent_attribution=None, calibration=None, config_file=None):
         """
         Initialize visualizer
         
@@ -22,6 +42,7 @@ class DBlockVisualizer:
         block -- DBlock object to visualize
         agent_attribution -- Dictionary of variables belonging to different entities, e.g. {"consumer": [...], "lender": [...]}
         calibration -- Model calibration parameters, used if provided
+        config_file -- Path to YAML configuration file (optional)
         """
         self.block = block
         self.agent_attribution = agent_attribution or {}
@@ -35,6 +56,9 @@ class DBlockVisualizer:
         
         # Use calibration parameters as model parameters
         self.parameters = self.calibration
+        
+        # Load visualization configuration
+        self.config = load_config(config_file) if config_file else load_config()
     
     def analyze(self):
         """
@@ -59,28 +83,28 @@ class DBlockVisualizer:
         # Track all classified model variables to avoid duplicates
         classified_vars = set()
         
-        # 1) Extract random shock variables (if present)
-        if hasattr(self.block, 'shocks'):
-            for var_name in self.block.shocks:
-                variables['shock_vars'].append(var_name)
-                classified_vars.add(var_name)
+        # 1) Extract random shock variables
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name in self.block.shocks:
+            variables['shock_vars'].append(var_name)
+            classified_vars.add(var_name)
         
-        # 2) Identify control and state variables from dynamics (if present)
-        if hasattr(self.block, 'dynamics'):
-            for var_name, rule in self.block.dynamics.items():
-                if isinstance(rule, Control):
-                    # If rule is a Control instance, treat as control variable
-                    variables['control_vars'].append(var_name)
-                else:
-                    variables['state_vars'].append(var_name)
-                classified_vars.add(var_name)
+        # 2) Identify control and state variables from dynamics
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name, rule in self.block.dynamics.items():
+            if isinstance(rule, Control):
+                # If rule is a Control instance, treat as control variable
+                variables['control_vars'].append(var_name)
+            else:
+                variables['state_vars'].append(var_name)
+            classified_vars.add(var_name)
         
-        # 3) Extract reward variables (if present)
-        if hasattr(self.block, 'reward'):
-            for var_name in self.block.reward:
-                if var_name not in classified_vars:  # Avoid duplicates
-                    variables['reward_vars'].append(var_name)
-                    classified_vars.add(var_name)
+        # 3) Extract reward variables
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name in self.block.reward:
+            if var_name not in classified_vars:  # Avoid duplicates
+                variables['reward_vars'].append(var_name)
+                classified_vars.add(var_name)
         
         # 4) Add known parameters, but only if not already classified as model variables
         for param_name in self.parameters:
@@ -103,62 +127,40 @@ class DBlockVisualizer:
         param_deps = defaultdict(set)  # Parameters to variables influence
         
         # 1. Analyze shocks and their parameter dependencies
-        if hasattr(self.block, 'shocks'):
-            for var_name, shock_def in self.block.shocks.items():
-                if isinstance(shock_def, tuple) and len(shock_def) == 2:
-                    shock_type, shock_params = shock_def
-                    deps = set()  # Use set to avoid duplicates
-                    
-                    # Process shock parameters
-                    if isinstance(shock_params, dict):
-                        for param_name, param_value in shock_params.items():
-                            if isinstance(param_value, str):
-                                # If it's a reference to a parameter value
-                                if param_value in self.parameters or param_value in self.variables.get('param_vars', set()):
-                                    deps.add(param_value)
-                                    # Record parameter influence on variables
-                                    param_deps[param_value].add(var_name)
-                    
-                    dependencies[var_name] = list(deps)
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name, shock_def in self.block.shocks.items():
+            if isinstance(shock_def, tuple) and len(shock_def) == 2:
+                shock_type, shock_params = shock_def
+                deps = set()  # Use set to avoid duplicates
+                
+                # Process shock parameters
+                if isinstance(shock_params, dict):
+                    for param_name, param_value in shock_params.items():
+                        if isinstance(param_value, str):
+                            # If it's a reference to a parameter value
+                            if param_value in self.parameters or param_value in self.variables.get('param_vars', set()):
+                                deps.add(param_value)
+                                # Record parameter influence on variables
+                                param_deps[param_value].add(var_name)
+                
+                dependencies[var_name] = list(deps)
         
         # 2. Analyze dynamics dependencies
-        if hasattr(self.block, 'dynamics'):
-            for var_name, rule in self.block.dynamics.items():
-                if isinstance(rule, Control):
-                    # For Control objects, use its information set as dependencies
-                    deps = set(rule.iset)  # Use set to avoid duplicates
-                    dependencies[var_name] = list(deps)
-                    
-                    # Record parameter influence on variables
-                    for dep in deps:
-                        if dep in self.variables.get('param_vars', set()):
-                            param_deps[dep].add(var_name)
-                else:
-                    try:
-                        sig = inspect.signature(rule)
-                        # Collect all parameters
-                        deps = set(sig.parameters.keys())  # Use set to avoid duplicates
-                        dependencies[var_name] = list(deps)
-                        
-                        # Record parameter influence on variables
-                        for dep in deps:
-                            if dep in self.variables.get('param_vars', set()):
-                                param_deps[dep].add(var_name)
-                                
-                        # Add unclassified parameters to parameter list
-                        for param in deps:
-                            if not any(param in var_list for var_type, var_list in self.variables.items() 
-                                     if var_type != 'param_vars' and isinstance(var_list, (list, set))):
-                                self.variables['param_vars'].add(param)
-                    except Exception as e:
-                        dependencies[var_name] = []
-                        print(f"Warning: Unable to extract dependencies for variable {var_name}: {e}")
-        
-        # 3. Analyze reward dependencies
-        if hasattr(self.block, 'reward'):
-            for var_name, reward_fn in self.block.reward.items():
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name, rule in self.block.dynamics.items():
+            if isinstance(rule, Control):
+                # For Control objects, use its information set as dependencies
+                deps = set(rule.iset)  # Use set to avoid duplicates
+                dependencies[var_name] = list(deps)
+                
+                # Record parameter influence on variables
+                for dep in deps:
+                    if dep in self.variables.get('param_vars', set()):
+                        param_deps[dep].add(var_name)
+            else:
                 try:
-                    sig = inspect.signature(reward_fn)
+                    sig = inspect.signature(rule)
+                    # Collect all parameters
                     deps = set(sig.parameters.keys())  # Use set to avoid duplicates
                     dependencies[var_name] = list(deps)
                     
@@ -170,11 +172,33 @@ class DBlockVisualizer:
                     # Add unclassified parameters to parameter list
                     for param in deps:
                         if not any(param in var_list for var_type, var_list in self.variables.items() 
-                                  if var_type != 'param_vars' and isinstance(var_list, (list, set))):
+                                 if var_type != 'param_vars' and isinstance(var_list, (list, set))):
                             self.variables['param_vars'].add(param)
                 except Exception as e:
                     dependencies[var_name] = []
-                    print(f"Warning: Unable to extract dependencies for reward variable {var_name}: {e}")
+                    print(f"Warning: Unable to extract dependencies for variable {var_name}: {e}")
+        
+        # 3. Analyze reward dependencies
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name, reward_fn in self.block.reward.items():
+            try:
+                sig = inspect.signature(reward_fn)
+                deps = set(sig.parameters.keys())  # Use set to avoid duplicates
+                dependencies[var_name] = list(deps)
+                
+                # Record parameter influence on variables
+                for dep in deps:
+                    if dep in self.variables.get('param_vars', set()):
+                        param_deps[dep].add(var_name)
+                        
+                # Add unclassified parameters to parameter list
+                for param in deps:
+                    if not any(param in var_list for var_type, var_list in self.variables.items() 
+                              if var_type != 'param_vars' and isinstance(var_list, (list, set))):
+                        self.variables['param_vars'].add(param)
+            except Exception as e:
+                dependencies[var_name] = []
+                print(f"Warning: Unable to extract dependencies for reward variable {var_name}: {e}")
         
         # Print dependencies for validation
         print("\nDepends on:")
@@ -199,11 +223,6 @@ class DBlockVisualizer:
         2. Any reference to an undefined variable is a reference to its previous period value
         3. Once a variable is defined, subsequent references to it are to its current period value
         """
-        # If dynamics is not present, no time dependencies to identify
-        if not hasattr(self.block, 'dynamics'):
-            self.prev_period_vars = set()
-            return set()
-        
         # Get the order of variable definitions in dynamics
         ordered_vars = list(self.block.dynamics.keys())
         
@@ -270,46 +289,18 @@ class DBlockVisualizer:
         """Extract formulas for variables"""
         formulas = {}
         
-        # Extract formulas from dynamics (if present)
-        if hasattr(self.block, 'dynamics'):
-            for var_name, rule in self.block.dynamics.items():
-                if isinstance(rule, Control):
-                    # For Control variables, show as Control(information set)
-                    deps_str = ', '.join(sorted(list(rule.iset)))
-                    formulas[var_name] = f"{var_name} = Control({deps_str})"
-                else:
-                    try:
-                        source = inspect.getsource(rule).strip()
-                        if "lambda" in source:
-                            formula = source.split(":", 1)[1].strip() if ":" in source else str(rule)
-                            
-                            # Get our specific previous period dependencies if available
-                            prev_period_deps = getattr(self, 'prev_period_deps', set())
-                            
-                            # Modify formula to show time dependencies with star/prime notation
-                            # based on specific dependencies
-                            for dep_var, dep in prev_period_deps:
-                                if dep_var == var_name and dep in formula:
-                                    if f" {dep}" in formula:
-                                        formula = formula.replace(f" {dep}", f" {dep}*")
-                                    if f"({dep}" in formula:
-                                        formula = formula.replace(f"({dep}", f"({dep}*")
-                                    if f"[{dep}" in formula:
-                                        formula = formula.replace(f"[{dep}", f"[{dep}*")
-                            
-                            formulas[var_name] = f"{var_name} = {formula}"
-                        else:
-                            formulas[var_name] = f"{var_name} = [Function]"
-                    except:
-                        formulas[var_name] = f"{var_name} = [Complex Function]"
-        
-        # Extract formulas from reward (if present)
-        if hasattr(self.block, 'reward'):
-            for var_name, reward_fn in self.block.reward.items():
+        # Extract formulas from dynamics
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name, rule in self.block.dynamics.items():
+            if isinstance(rule, Control):
+                # For Control variables, show as Control(information set)
+                deps_str = ', '.join(sorted(list(rule.iset)))
+                formulas[var_name] = f"{var_name} = Control({deps_str})"
+            else:
                 try:
-                    source = inspect.getsource(reward_fn).strip()
+                    source = inspect.getsource(rule).strip()
                     if "lambda" in source:
-                        formula = source.split(":", 1)[1].strip() if ":" in source else str(reward_fn)
+                        formula = source.split(":", 1)[1].strip() if ":" in source else str(rule)
                         
                         # Get our specific previous period dependencies if available
                         prev_period_deps = getattr(self, 'prev_period_deps', set())
@@ -331,6 +322,34 @@ class DBlockVisualizer:
                 except:
                     formulas[var_name] = f"{var_name} = [Complex Function]"
         
+        # Extract formulas from reward
+        # No need to check if attribute exists - it's always there (even if empty)
+        for var_name, reward_fn in self.block.reward.items():
+            try:
+                source = inspect.getsource(reward_fn).strip()
+                if "lambda" in source:
+                    formula = source.split(":", 1)[1].strip() if ":" in source else str(reward_fn)
+                    
+                    # Get our specific previous period dependencies if available
+                    prev_period_deps = getattr(self, 'prev_period_deps', set())
+                    
+                    # Modify formula to show time dependencies with star/prime notation
+                    # based on specific dependencies
+                    for dep_var, dep in prev_period_deps:
+                        if dep_var == var_name and dep in formula:
+                            if f" {dep}" in formula:
+                                formula = formula.replace(f" {dep}", f" {dep}*")
+                            if f"({dep}" in formula:
+                                formula = formula.replace(f"({dep}", f"({dep}*")
+                            if f"[{dep}" in formula:
+                                formula = formula.replace(f"[{dep}", f"[{dep}*")
+                    
+                    formulas[var_name] = f"{var_name} = {formula}"
+                else:
+                    formulas[var_name] = f"{var_name} = [Function]"
+            except:
+                formulas[var_name] = f"{var_name} = [Complex Function]"
+        
         # Add parameter values as formulas
         for param_name, param_value in self.parameters.items():
             if param_name in self.variables.get('param_vars', set()):
@@ -341,7 +360,6 @@ class DBlockVisualizer:
         for var, formula in sorted(formulas.items()):
             print(f"  {formula}")
         
-        # Corrected line: assign the formulas to self.formulas
         self.formulas = formulas
     
     def get_agent_for_variable(self, var_name):
@@ -358,77 +376,76 @@ class DBlockVisualizer:
                 return agent
         return "other"
     
-    def create_graph(self, output_file=None, show=True, color_seed=42):
+    def create_graph(self, output_file=None, show=True, color_seed=42, 
+                     shape_map=None, node_styles=None, edge_styles=None, 
+                     color_config=None, graph_layout=None, graph_config=None):
         """
         Create a visual graph of the model using pydot and optionally display
         
-        Parameters:
-        output_file -- Optional output file path
-        show -- Whether to display the image
-        color_seed -- Seed for color generation (default: 42)
-        
-        Returns:
-        pydot.Dot object representing the model structure graph
         """
         if not self.variables or not self.dependencies:
             self.analyze()
         
-        # Define different shapes for different variable types
-        shape_map = {
-            "shock_vars": "triangle",
-            "state_vars": "ellipse",
-            "control_vars": "box",
-            "reward_vars": "diamond",
-            "param_vars": "hexagon"  # Hexagon for parameters
-        }
+        # Use provided style configurations or load from config
+        shape_map = shape_map or self.config['variable_shapes']
+        node_styles = node_styles or self.config['node_styles']
+        edge_styles = edge_styles or self.config['edge_styles']
+        color_config = color_config or self.config['color_config']
+        graph_layout = graph_layout or self.config['graph_layout']
+        graph_config = graph_config or self.config['graph_config']
         
         # Set up random color generation with seed for reproducibility
         random.seed(color_seed)
-        
-        # Function to generate distinct colors
-        def generate_distinct_colors(n):
-            colors = []
-            for i in range(n):
-                # Use golden ratio to create well-distributed hues
-                h = (i * 0.618033988749895) % 1.0
-                # Medium-high saturation and lightness for good visibility
-                s = 0.5 + random.random() * 0.2
-                l = 0.4 + random.random() * 0.2
-                
-                # Convert HSL to RGB
-                r, g, b = colorsys.hls_to_rgb(h, l, s)
-                
-                # Convert to hex
-                hex_color = "#{:02x}{:02x}{:02x}".format(
-                    int(r * 255), int(g * 255), int(b * 255)
-                )
-                colors.append(hex_color)
-            return colors
         
         # Get all unique agents
         all_agents = list(self.agent_attribution.keys())
         if "other" not in all_agents:
             all_agents.append("other")
         
-        # Generate colors for agents
+        # Generate colors for agents using parameters from config
+        color_gen_config = self.config['color_generation']
         agent_colors = {}
-        distinct_colors = generate_distinct_colors(len(all_agents))
+        random.seed(color_seed)
+
         for i, agent in enumerate(all_agents):
-            agent_colors[agent] = distinct_colors[i]
+            # Use golden ratio to create well-distributed hues based on config
+            h = (i * color_gen_config['golden_ratio_factor']) % 1.0
+            
+            # Get saturation and lightness ranges from config
+            s_min, s_max = color_gen_config['saturation_range']
+            l_min, l_max = color_gen_config['lightness_range']
+            
+            # Generate random saturation and lightness within configured ranges
+            s = s_min + random.random() * (s_max - s_min)
+            l = l_min + random.random() * (l_max - l_min)
+            
+            # Convert HSL to RGB
+            r, g, b = colorsys.hls_to_rgb(h, l, s)
+            
+            # Convert to hex
+            hex_color = "#{:02x}{:02x}{:02x}".format(
+                int(r * 255), int(g * 255), int(b * 255)
+            )
+            agent_colors[agent] = hex_color
         
-        # Create directed graph, left to right layout
-        graph = pydot.Dot("ModelStructure", graph_type="digraph", rankdir="LR")
+        # Get default other color from config
+        default_other_color = color_config['default_other_color']
+        
+        # Create directed graph with layout from config
+        graph = pydot.Dot(graph_config['title'], graph_type=graph_config['graph_type'], 
+                          rankdir=graph_layout['rankdir'])
         
         # Create subgraphs to group entities
         agent_subgraphs = {}
         for agent in all_agents:
+            label = agent.capitalize() if graph_layout['cluster_label_capitalize'] else agent
             agent_subgraph = pydot.Cluster(
                 f"cluster_{agent}",
-                label=agent.capitalize(),
-                style="filled",
-                fillcolor="#FFFFFF",
-                color=agent_colors.get(agent, "#708090"),
-                fontcolor=agent_colors.get(agent, "#708090")
+                label=label,
+                style=graph_layout['cluster_style'],
+                fillcolor=graph_layout['cluster_fillcolor'],
+                color=agent_colors.get(agent, default_other_color),
+                fontcolor=agent_colors.get(agent, default_other_color)
             )
             agent_subgraphs[agent] = agent_subgraph
             graph.add_subgraph(agent_subgraph)
@@ -451,20 +468,27 @@ class DBlockVisualizer:
                     break
             
             if var_type:
-                shape = shape_map.get(var_type, "ellipse")
+                shape = shape_map[var_type] if var_type in shape_map else shape_map['default']
                 agent = self.get_agent_for_variable(var)
-                color = agent_colors.get(agent, agent_colors.get("other", "#708090"))
+                color = agent_colors.get(agent, default_other_color)
+                
+                # Get node style from config
+                default_style = node_styles['default']
+                prev_period_style = node_styles['previous_period']
+                
+                # Combine default and previous period styles
+                node_style = {**default_style, **prev_period_style}
                 
                 prev_node = pydot.Node(
                     prev_var_id,
                     label=f"{var}*",  # Using star/prime notation
                     shape=shape,
-                    style="filled,dashed",  # Dashed style for previous period
+                    style=node_style['style'],
                     fillcolor=color,
                     color=color,
-                    fontcolor="#000000",
-                    fontname="Arial",
-                    tooltip=f"Previous period {var}"
+                    fontcolor=node_style['fontcolor'],
+                    fontname=node_style['fontname'],
+                    tooltip=f"{node_style['tooltip_prefix']}{var}"
                 )
                 agent_subgraphs[agent].add_node(prev_node)
                 created_nodes[prev_var_id] = prev_node
@@ -475,19 +499,22 @@ class DBlockVisualizer:
                 var_items = var_list if isinstance(var_list, list) else list(var_list)
                 for var in var_items:
                     if var not in created_nodes:
-                        shape = shape_map.get(var_type, "ellipse")
+                        shape = shape_map[var_type] if var_type in shape_map else shape_map['default']
                         agent = self.get_agent_for_variable(var)
-                        color = agent_colors.get(agent, agent_colors.get("other", "#708090"))
+                        color = agent_colors.get(agent, default_other_color)
+                        
+                        # Get default node style from config
+                        default_style = node_styles['default']
                         
                         node = pydot.Node(
                             var,
                             label=var,
                             shape=shape,
-                            style="filled",
+                            style=default_style['style'],
                             fillcolor=color, 
                             color=color,
-                            fontcolor="#000000",
-                            fontname="Arial",
+                            fontcolor=default_style['fontcolor'],
+                            fontname=default_style['fontname'],
                             tooltip=self.formulas.get(var, "")
                         )
                         agent_subgraphs[agent].add_node(node)
@@ -529,18 +556,25 @@ class DBlockVisualizer:
                         # Check if edge already exists
                         if edge_id not in created_edges:
                             agent = self.get_agent_for_variable(var)
-                            color = agent_colors.get(agent, agent_colors.get("other", "#708090"))
+                            color = agent_colors.get(agent, default_other_color)
                             
-                            # For previous period variables use dashed lines
-                            style = "dashed" if dep.endswith("_prev") else "solid"
+                            # Get edge style based on whether it's a previous period dependency
+                            if dep.endswith("_prev"):
+                                edge_style = edge_styles['previous_period']
+                            else:
+                                edge_style = edge_styles['current_period']
+                            
+                            # Combine with default edge style
+                            default_edge_style = edge_styles['default']
+                            combined_style = {**default_edge_style, **edge_style}
                             
                             edge = pydot.Edge(
                                 dep,
                                 var,
                                 color=color,
-                                style=style,
-                                arrowhead="normal",
-                                arrowsize=0.8
+                                style=combined_style['style'],
+                                arrowhead=combined_style['arrowhead'],
+                                arrowsize=combined_style['arrowsize']
                             )
                             graph.add_edge(edge)
                             created_edges.add(edge_id)
@@ -558,15 +592,18 @@ class DBlockVisualizer:
                             if edge_id not in created_edges:
                                 # Use parameter's agent color or default
                                 param_agent = self.get_agent_for_variable(param)
-                                param_color = agent_colors.get(param_agent, agent_colors.get("other", "#708090"))
+                                param_color = agent_colors.get(param_agent, default_other_color)
+                                
+                                # Get default edge style
+                                default_edge_style = edge_styles['default']
                                 
                                 edge = pydot.Edge(
                                     param,
                                     var,
                                     color=param_color,
-                                    style="solid",
-                                    arrowhead="normal",
-                                    arrowsize=0.8
+                                    style=default_edge_style['style'],
+                                    arrowhead=default_edge_style['arrowhead'],
+                                    arrowsize=default_edge_style['arrowsize']
                                 )
                                 graph.add_edge(edge)
                                 created_edges.add(edge_id)
@@ -589,20 +626,27 @@ class DBlockVisualizer:
                     os.remove(temp_file)
         return graph
 
-def visualize_dblock(block, agent_attribution=None, calibration=None, output_file=None, show=True):
+def visualize_dblock(block, agent_attribution=None, calibration=None, output_file=None, show=True, 
+                    color_seed=None, config_file=None, shape_map=None, node_styles=None, 
+                    edge_styles=None, color_config=None, graph_layout=None, graph_config=None):
     """
     Create and display visualization of a DBlock object
-    
-    Parameters:
-    block -- DBlock object to visualize
-    agent_attribution -- Dictionary of variables belonging to different entities
-    calibration -- Model calibration parameters
-    output_file -- Optional output file path
-    show -- Whether to display the image
-    
-    Returns:
-    pydot.Dot object representing the model structure graph
     """
-    visualizer = DBlockVisualizer(block, agent_attribution, calibration)
+    visualizer = DBlockVisualizer(block, agent_attribution, calibration, config_file)
     visualizer.analyze()
-    return visualizer.create_graph(output_file, show)
+    
+    # If color_seed is not provided, use the one from config
+    if color_seed is None:
+        color_seed = visualizer.config['color_generation']['color_seed']
+    
+    return visualizer.create_graph(
+        output_file=output_file, 
+        show=show,
+        color_seed=color_seed,
+        shape_map=shape_map,
+        node_styles=node_styles,
+        edge_styles=edge_styles,
+        color_config=color_config,
+        graph_layout=graph_layout,
+        graph_config=graph_config
+    )
