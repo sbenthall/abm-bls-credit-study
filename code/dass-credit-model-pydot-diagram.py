@@ -196,6 +196,7 @@ def _(SVG, add_node, pydot):
     lbdot.add_edge( pydot.Edge('d','pi'))
     lbdot.add_edge( pydot.Edge('q','pi'))
 
+    lbdot.add_edge( pydot.Edge('s','d'))
     lbdot.add_edge( pydot.Edge('h','d'))
     lbdot.add_edge( pydot.Edge('e','d'))
     lbdot.add_edge( pydot.Edge('q','d'))
