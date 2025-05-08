@@ -9,9 +9,13 @@ Consumer variables:
     - $p$ protected attribute
     - $\beta$ discount factor (could be heterogeneous)
     - risk aversion
-  - States $x_t = (a_t, h_t)$ (wealth and credit history, carried over from the previous period)
-  - exogenous shock $z_t$ (which includes earnings).
+
+  - exogenous state $z_t$ (which includes earnings).
     - these can be correleted with consumer heterogeneous attributes.
+    - Driven by i.i.d. innovation process $\epsilon$
+    - $z_{t+1} = Z(z_t, \epsilon)$
+  - States $x_t = (a_t, h_t)$ (wealth and credit history, carried over from the previous period)
+
   - action $y_t=(c_t, d_t)$ (consumption and default)
     - $d_t$ is $\{0,1}$, discrete. (I suppose we could make this continuous, valued between 0 and 1, if we preferred continuous spaces.)
 
@@ -30,10 +34,9 @@ Lender variables:
 -  lender parameterized decision rule: 
   - **AL original:** $q_t = \rho(x_t, y_t, z_t; \phi)$
   - **SB proposal:** $q_{t+1} = \rho(x_{t+1}; \phi) = \rho(x_t, y_t, z_t; \phi)$
-- **Question: are we keeping earnings $e$ as a random walk? Are shocks $z$ a Markov process?**
 - $x_{t+1} = T(x_t, y^*_t, z_t; q^*_t)$. Which can be broken down into:
   - $a_{t+1} = T_a(x_t,  y^*_t, z_t; q^*_t)$
-    - $ a_{t+1} = (1-d_t) (1/q_t) [ a_t + e(z_t) - c_t ] $
+    - $ a_{t+1} = (1-d_t) (1/\rho((a_t, h_t)), (c_t, d_t)), z_t; \phi)) [ a_t + e(z_t) - c_t ] $
   - $h_{t+1} = T_h(x_t,  y^*_t, z_t; q^*_t)$
     - Does $h$ depend on $\phi$?
     - $h_{t+1} = \eta h_t + \phi_e z_e + \phi_d d$ where:
