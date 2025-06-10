@@ -96,9 +96,31 @@ Consumers just get the rate sheet from the banks, no explanation.
 
 ### Explaining reason
 
+adverse action notices.
+
 Consumers are given information about what they could do to improve situation.
 
 (This means that consumers are no longer perfectly informed to begin with. Why would that be? In the case of a complex generative process on finances.)
+
+
+#### Which could lead to a disputed judgment
+
+Hard to get standing. ?
+
+Notice helps show that you didn't get a loan.
+
+# Errors
+
+## Errors in credit report
+
+Data brokerages can collect data, but it can be wrong.
+These can go into credit reports.
+
+A generative model of other correlaries to financial data.
+Could be protected, or unprotected.
+
+
+
 
 # Measurements on the model
 
