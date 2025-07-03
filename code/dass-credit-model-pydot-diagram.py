@@ -22,7 +22,7 @@ def _():
         "eta" : 0.9, # credit history forgetting rate
         "crra" : 2, # coefficient of relative risk aversion, used in consumer utility function
         "r*" : .1, # bank borrowing rate
-    
+        "a_bar" : 100, # artificial borrowing constraint
     }
     return
 

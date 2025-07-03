@@ -9,7 +9,7 @@ calibration = {
     "beta": 0.9, # discount factor, potentially heterogeneous
     "eta" : 0.9, # credit history forgetting rate # TODO : Parameter sweeping over this.
     "crra" : 2, # coefficient of relative risk aversion, used in consumer utility function
-    "r*" : .1, # bank borrowing rate
+    "rb" : .1, # bank borrowing rate
     "r_ceiling" : 1, # usury limit/max bank interest rate # TODO : Parameter sweeping over this.
     "a_bar" : 100, # artificial borrowing constraint
 }
@@ -81,7 +81,7 @@ lending_block = DBlock(
                                                    #       on distribution.
             "h" : lambda e, h, d, zh, phi_d, phi_e, eta: eta * h + phi_d * d + phi_e * e + zh,
 
-            "pi" : lambda d, k, q: - (1 - d) * k * (q - 1) # profit
+            "pi" : lambda d, k, q, rb: - (1 - d) * k * (q - 1 - rb) # profit
         },
         "reward": {
             "pi" : "lender"
